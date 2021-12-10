@@ -33,17 +33,26 @@ def main():
     print('--------------------encryption-----------------------------------')
 
     encrypted = AES.encrypt(setUp,plaintext)
-    print(hex(encrypted))
-    matrix = hexmatrix(encrypted)
-    print(matrix)
+    roundNum = 1
+    for round in encrypted:
+        print('--------------------round '+ str(roundNum)+'--------------------')
+        print(hex(round))
+        matrix = hexmatrix(round)
+        print(matrix)
+        roundNum+=1
+
+
 
     print('\n--------------------Decryption-----------------------------------')
 
-    decrypted = AES.decrypt(setUp,encrypted)
-    print(hex(decrypted))
-    matrixDec = hexmatrix(decrypted)
-    print(matrixDec)
-
+    decrypted = AES.decrypt(setUp,encrypted[len(encrypted)-1])
+    roundNum = 1
+    for round in decrypted:
+        print('--------------------round '+ str(roundNum)+'--------------------')
+        print(hex(round))
+        matrixDec = hexmatrix(round)
+        print(matrixDec)
+        roundNum+=1
 
 
     # Wrong Output!

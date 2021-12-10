@@ -83,6 +83,7 @@ def text2matrix(text):
             matrix[int(i / 4)].append(byte)
 
 
+
     return matrix
 
 
@@ -125,21 +126,25 @@ class AES:
 
     def encrypt(self, plaintext):
         self.plain_state = text2matrix(plaintext)
+        Allrounds=[]
 
         self.__add_round_key(self.plain_state, self.round_keys[:4])
 
         for i in range(1, 10):
             self.__round_encrypt(self.plain_state, self.round_keys[4 * i : 4 * (i + 1)])
+            Allrounds.append(matrix2text(self.plain_state))
 
         self.__sub_bytes(self.plain_state)
         self.__shift_rows(self.plain_state)
         self.__add_round_key(self.plain_state, self.round_keys[40:])
+        Allrounds.append(matrix2text(self.plain_state))
 
 
 
-        return matrix2text(self.plain_state)
+        return Allrounds
 
     def decrypt(self, ciphertext):
+        Allrounds=[]
         self.cipher_state = text2matrix(ciphertext)
 
         self.__add_round_key(self.cipher_state, self.round_keys[40:])
@@ -148,12 +153,14 @@ class AES:
 
         for i in range(9, 0, -1):
             self.__round_decrypt(self.cipher_state, self.round_keys[4 * i : 4 * (i + 1)])
+            Allrounds.append(matrix2text(self.cipher_state))
+
 
         self.__add_round_key(self.cipher_state, self.round_keys[:4])
 
+        Allrounds.append(matrix2text(self.cipher_state))
 
-
-        return matrix2text(self.cipher_state)
+        return Allrounds
 
     def __add_round_key(self, s, k):
         for i in range(4):
