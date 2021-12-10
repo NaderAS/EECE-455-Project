@@ -77,14 +77,18 @@ def text2matrix(text):
         byte = (text >> (8 * (15 - i))) & 0xFF
         if i % 4 == 0:
             matrix.append([byte])
+
         else:
             # Added conversion to integer
             matrix[int(i / 4)].append(byte)
+
+
     return matrix
 
 
 def matrix2text(matrix):
     text = 0
+
     for i in range(4):
         for j in range(4):
             text |= (matrix[i][j] << (120 - 8 * (4 * i + j)))
@@ -131,6 +135,8 @@ class AES:
         self.__shift_rows(self.plain_state)
         self.__add_round_key(self.plain_state, self.round_keys[40:])
 
+
+
         return matrix2text(self.plain_state)
 
     def decrypt(self, ciphertext):
@@ -144,6 +150,8 @@ class AES:
             self.__round_decrypt(self.cipher_state, self.round_keys[4 * i : 4 * (i + 1)])
 
         self.__add_round_key(self.cipher_state, self.round_keys[:4])
+
+
 
         return matrix2text(self.cipher_state)
 
