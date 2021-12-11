@@ -127,6 +127,7 @@ class AES:
 
         # print self.round_keys
         n = 4
+        #to check at which word we should do the extra operation
         if self.numofrounds == 12:
             n = 6
         elif self.numofrounds == 14:
@@ -138,10 +139,11 @@ class AES:
 
         for i in range(n, 4 * (self.numofrounds+1)):
             self.round_keys.append([])
+
             if i % n == 0:
                 byte = self.round_keys[i - n][0]        \
                      ^ Sbox[self.round_keys[i - 1][1]]  \
-                     ^ Rcon[int(i / 8)] # Added conversion to integer
+                     ^ Rcon[int(i / n)] # Added conversion to integer
                 self.round_keys[i].append(byte)
 
                 for j in range(1, 4):
