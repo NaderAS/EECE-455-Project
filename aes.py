@@ -81,10 +81,25 @@ def text2matrix(text):
         else:
             # Added conversion to integer
             matrix[int(i / 4)].append(byte)
-
-
-
     return matrix
+
+def textomatrix(text,n):
+        matrix = []
+
+        for i in range(n*4):
+            byte = (text >> (8 * ((n*4-1) - i))) & 0xFF
+            if i % 4 == 0:
+                matrix.append([byte])
+
+            else:
+                # Added conversion to integer
+                matrix[int(i / 4)].append(byte)
+        return matrix
+
+
+
+
+
 
 
 def matrix2text(matrix):
@@ -97,46 +112,77 @@ def matrix2text(matrix):
 
 
 class AES:
-    def __init__(self, master_key):
+    def __init__(self, master_key,type):
+        self.numRounds(type)
         self.change_key(master_key)
+    def numRounds(self,type):
+        if type ==128:
+            self.numofrounds = 10
+        elif type == 192:
+            self.numofrounds = 12
+        elif type == 256:
+            self.numofrounds = 14
 
     def change_key(self, master_key):
-        self.round_keys = text2matrix(master_key)
-        # print self.round_keys
 
-        for i in range(4, 4 * 11):
+        # print self.round_keys
+        n = 4
+        if self.numofrounds == 12:
+            n = 6
+        elif self.numofrounds == 14:
+            n = 8
+        self.round_keys = textomatrix(master_key,n)
+
+
+
+
+        for i in range(n, 4 * (self.numofrounds+1)):
             self.round_keys.append([])
-            if i % 4 == 0:
-                byte = self.round_keys[i - 4][0]        \
+            if i % n == 0:
+                byte = self.round_keys[i - n][0]        \
                      ^ Sbox[self.round_keys[i - 1][1]]  \
-                     ^ Rcon[int(i / 4)] # Added conversion to integer
+                     ^ Rcon[int(i / 8)] # Added conversion to integer
                 self.round_keys[i].append(byte)
 
                 for j in range(1, 4):
-                    byte = self.round_keys[i - 4][j]    \
+                    byte = self.round_keys[i - n][j]    \
                          ^ Sbox[self.round_keys[i - 1][(j + 1) % 4]]
                     self.round_keys[i].append(byte)
+            elif i%4==0 and n!=4:
+                for j in range(4):
+                    byte = self.round_keys[i - n][j]    \
+                         ^ Sbox[self.round_keys[i - 1][j]]
+                    self.round_keys[i].append(byte)
+
             else:
                 for j in range(4):
-                    byte = self.round_keys[i - 4][j]    \
+                    byte = self.round_keys[i - n][j]    \
                          ^ self.round_keys[i - 1][j]
                     self.round_keys[i].append(byte)
+
+
+
+    def getexpandedkey(self):
+        return self.round_keys
+
 
         # print self.round_keys
 
     def encrypt(self, plaintext):
         self.plain_state = text2matrix(plaintext)
         Allrounds=[]
+        Allrounds.append(matrix2text(self.plain_state))
+
 
         self.__add_round_key(self.plain_state, self.round_keys[:4])
 
-        for i in range(1, 10):
+        for i in range(1, self.numofrounds):
             self.__round_encrypt(self.plain_state, self.round_keys[4 * i : 4 * (i + 1)])
             Allrounds.append(matrix2text(self.plain_state))
 
         self.__sub_bytes(self.plain_state)
         self.__shift_rows(self.plain_state)
-        self.__add_round_key(self.plain_state, self.round_keys[40:])
+        self.__add_round_key(self.plain_state, self.round_keys[self.numofrounds*4:])
         Allrounds.append(matrix2text(self.plain_state))
 
 
@@ -146,12 +192,12 @@ class AES:
     def decrypt(self, ciphertext):
         Allrounds=[]
         self.cipher_state = text2matrix(ciphertext)
-
-        self.__add_round_key(self.cipher_state, self.round_keys[40:])
+        Allrounds.append(matrix2text(self.cipher_state))
+        self.__add_round_key(self.cipher_state, self.round_keys[self.numofrounds*4:])
         self.__inv_shift_rows(self.cipher_state)
         self.__inv_sub_bytes(self.cipher_state)
 
-        for i in range(9, 0, -1):
+        for i in range(self.numofrounds-1, 0, -1):
             self.__round_decrypt(self.cipher_state, self.round_keys[4 * i : 4 * (i + 1)])
             Allrounds.append(matrix2text(self.cipher_state))
 
