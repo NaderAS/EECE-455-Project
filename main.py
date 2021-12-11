@@ -16,9 +16,9 @@ def hexmatrix(plaintext):
 def main():
     print("EECE 455 Project")
     # plaintext = input("Please input the Message in Hexadecimal: ")
-    plaintext = 0x00000000000000000000000000000000
+    plaintext = 0x2b7e151628aed2a6abf7158809cf4f3c
     # key = input("Please input the Key in Hexadecimal: ")
-    master_key =0x00000000000000000000000000000000
+    master_key =0x2b7e151628aed2a6abf7158809cf4f3c6bc1bee22e409f96
 
     # # Output result as a 4x4 matrix:
     # a = np.array([[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]])
@@ -27,13 +27,13 @@ def main():
     #     print ('  '.join(map(str, line)))
 
 
-    setUp = AES(master_key)
+    setUp = AES(master_key,192)
 
 
     print('--------------------encryption-----------------------------------')
 
     encrypted = AES.encrypt(setUp,plaintext)
-    roundNum = 1
+    roundNum = 0
     for round in encrypted:
         print('--------------------round '+ str(roundNum)+'--------------------')
         print(hex(round))
@@ -43,16 +43,30 @@ def main():
 
 
 
+
+
     print('\n--------------------Decryption-----------------------------------')
 
     decrypted = AES.decrypt(setUp,encrypted[len(encrypted)-1])
-    roundNum = 1
+    roundNum = 0
     for round in decrypted:
         print('--------------------round '+ str(roundNum)+'--------------------')
         print(hex(round))
         matrixDec = hexmatrix(round)
         print(matrixDec)
         roundNum+=1
+
+
+
+    print('\n--------------------Expanded key for all rounds-----------------------------------\n')
+
+    expandedkey = AES.getexpandedkey(setUp)
+    for i in range(len(expandedkey)):
+        for j in range(len(expandedkey[i])):
+            expandedkey[i][j] = hex(expandedkey[i][j])
+    print(expandedkey)
+
+
 
 
     # Wrong Output!
